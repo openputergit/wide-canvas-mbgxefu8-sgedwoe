@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InstaView - Camera Views</title>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stats.js/r17/Stats.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .camera-view {
+            background: rgba(0, 0, 0, 0.1);
+            border: 2px solid #2d3748;
+            transition: all 0.3s ease;
+        }
+        .camera-view:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .lottie-container {
+            perspective: 1000px;
+        }
+        @media (max-width: 768px) {
+            .camera-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header with App Name -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">InstaView</h1>
+            <p class="text-gray-600">Real-time Camera Monitoring System</p>
+        </header>
+
+        <!-- 3D Lottie Icons Section -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+            <div class="lottie-container">
+                <lottie-player
+                    src="https://assets5.lottiefiles.com/packages/lf20_UJNc2t.json"
+                    background="transparent"
+                    speed="1"
+                    class="w-full h-48"
+                    loop
+                    autoplay>
+                </lottie-player>
+            </div>
+            <div class="lottie-container">
+                <lottie-player
+                    src="https://assets9.lottiefiles.com/packages/lf20_yjh7scsd.json"
+                    background="transparent"
+                    speed="1"
+                    class="w-full h-48"
+                    loop
+                    autoplay>
+                </lottie-player>
+            </div>
+            <div class="lottie-container">
+                <lottie-player
+                    src="https://assets2.lottiefiles.com/packages/lf20_jcikwtux.json"
+                    background="transparent"
+                    speed="1"
+                    class="w-full h-48"
+                    loop
+                    autoplay>
+                </lottie-player>
+            </div>
+        </div>
+
+        <!-- Camera Views Section -->
+        <div class="grid camera-grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Camera View 1 -->
+            <div class="camera-view rounded-lg p-4">
+                <div class="bg-black aspect-video rounded-lg mb-4">
+                    <div id="camera1" class="w-full h-full flex items-center justify-center text-white">
+                        <i class="bi bi-camera-video text-4xl"></i>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-semibold">Camera 1</h3>
+                    <button onclick="toggleCamera(1)" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                        <i class="bi bi-play-fill"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Camera View 2 -->
+            <div class="camera-view rounded-lg p-4">
+                <div class="bg-black aspect-video rounded-lg mb-4">
+                    <div id="camera2" class="w-full h-full flex items-center justify-center text-white">
+                        <i class="bi bi-camera-video text-4xl"></i>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-semibold">Camera 2</h3>
+                    <button onclick="toggleCamera(2)" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                        <i class="bi bi-play-fill"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Camera View 3 -->
+            <div class="camera-view rounded-lg p-4">
+                <div class="bg-black aspect-video rounded-lg mb-4">
+                    <div id="camera3" class="w-full h-full flex items-center justify-center text-white">
+                        <i class="bi bi-camera-video text-4xl"></i>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-semibold">Camera 3</h3>
+                    <button onclick="toggleCamera(3)" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                        <i class="bi bi-play-fill"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Camera functionality
+        const cameraStates = {
+            1: false,
+            2: false,
+            3: false
+        };
+
+        async function toggleCamera(cameraId) {
+            const camera = document.getElementById(`camera${cameraId}`);
+            const button = camera.parentElement.parentElement.querySelector('button i');
+
+            if (!cameraStates[cameraId]) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    const video = document.createElement('video');
+                    video.srcObject = stream;
+                    video.autoplay = true;
+                    video.classList.add('w-full', 'h-full', 'rounded-lg');
+                    camera.innerHTML = '';
+                    camera.appendChild(video);
+                    button.classList.replace('bi-play-fill', 'bi-stop-fill');
+                    cameraStates[cameraId] = true;
+                } catch (err) {
+                    console.error("Error accessing camera:", err);
+                    alert("Unable to access camera. Please check permissions.");
+                }
+            } else {
+                const video = camera.querySelector('video');
+                if (video) {
+                    const stream = video.srcObject;
+                    const tracks = stream.getTracks();
+                    tracks.forEach(track => track.stop());
+                    video.remove();
+                }
+                camera.innerHTML = '<i class="bi bi-camera-video text-4xl"></i>';
+                button.classList.replace('bi-stop-fill', 'bi-play-fill');
+                cameraStates[cameraId] = false;
+            }
+        }
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
